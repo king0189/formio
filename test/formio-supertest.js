@@ -15,7 +15,9 @@ const request = app => {
     try {
       error.message += '\n\nResponse: ' + JSON.stringify(JSON.parse(test.res.text), null, 4)
     }
-    catch {}
+    catch (err) {
+      console.warn(err);
+    }
 
     error.stack = '';
   }));
