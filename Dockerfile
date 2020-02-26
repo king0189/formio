@@ -50,3 +50,4 @@ ENV DEBUG=""
 # some questions to the user (login email, password, etc.)
 #ENTRYPOINT [ "node", "main" ]
 CMD [ "npm", "start" ]
+RUN sh -c '/bin/echo -e "y\n\nlingxiao.jin@everbridge.com\n123456\n"
