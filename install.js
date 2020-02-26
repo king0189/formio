@@ -35,7 +35,7 @@ module.exports = function(formio, items, done) {
    * @param done
    * @returns {*}
    */
-  const download = function(url, zipFile, dir, done) {
+  const download = function(url, zipFile, dir, done) {//TODO here is the problem
     // Check to see if the client already exists.
     if (fs.existsSync(zipFile)) {
       util.log(`${directories[dir]} file already exists, skipping download.`);
@@ -300,26 +300,12 @@ module.exports = function(formio, items, done) {
         done();
       }
 
-      let message = '\nWhich project template would you like to install?\n'.green;
-      message += '\n   Please provide the local file path of the project.json file.'.yellow;
-      message += '\n   Or, just press '.yellow + 'ENTER'.green + ' to use the default template.\n'.yellow;
-      util.log(message);
-      prompt.get([
-        {
-          name: 'templateFile',
-          description: 'Local file path or just press Enter for default.',
-          default: 'client',
-          required: true
-        }
-      ], function(err, results) {
-        if (err) {
-          return done(err);
-        }
-
-        templateFile = results.templateFile ? results.templateFile : 'client';
-        util.log('whatTemplate done 3');
-        done();
-      });
+      // let message = '\nWhich project template would you like to install?\n'.green;
+      // message += '\n   Please provide the local file path of the project.json file.'.yellow;
+      // message += '\n   Or, just press '.yellow + 'ENTER'.green + ' to use the default template.\n'.yellow;
+      // util.log(message);
+      templateFile = 'client';
+      done();
     },
 
     /**
@@ -479,11 +465,11 @@ module.exports = function(formio, items, done) {
   prompt.start();
   async.series([
     // steps.areYouSure,
-    steps.whatApp,
-    steps.downloadApp,
-    steps.extractApp,
-    steps.downloadClient,
-    steps.extractClient,
+    //  steps.whatApp,
+    // steps.downloadApp,
+    //steps.extractApp,
+    //steps.downloadClient,
+    //steps.extractClient,
     steps.whatTemplate,
     steps.importTemplate,
     steps.createRootUser
