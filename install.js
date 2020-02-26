@@ -9,6 +9,8 @@ nunjucks.configure([], {watch: false});
 const util = require('./src/util/util');
 const debug = require('debug')('formio:error');
 const path = require('path');
+const rootUser = "lingxiao.jin@everbridge.com";
+const rootPwd = "123456";
 
 module.exports = function(formio, items, done) {
   // The project that was created.
@@ -50,44 +52,44 @@ module.exports = function(formio, items, done) {
     let bar = null;
     (function downloadProject() {
       request.get(url)
-        .on('response', function(res) {
-          if (
-            !res.headers.hasOwnProperty('content-disposition') ||
-            !parseInt(res.headers['content-length'], 10)
-          ) {
-            if (tries++ > 3) {
-              return done('Unable to download project. Please try again.');
+          .on('response', function(res) {
+            if (
+                !res.headers.hasOwnProperty('content-disposition') ||
+                !parseInt(res.headers['content-length'], 10)
+            ) {
+              if (tries++ > 3) {
+                return done('Unable to download project. Please try again.');
+              }
+
+              setTimeout(downloadProject, 200);
+              return;
             }
 
-            setTimeout(downloadProject, 200);
-            return;
-          }
+            // Setup the progress bar.
+            bar = new ProgressBar('  downloading [:bar] :percent :etas', {
+              complete: '=',
+              incomplete: ' ',
+              width: 50,
+              total: parseInt(res.headers['content-length'], 10)
+            });
 
-          // Setup the progress bar.
-          bar = new ProgressBar('  downloading [:bar] :percent :etas', {
-            complete: '=',
-            incomplete: ' ',
-            width: 50,
-            total: parseInt(res.headers['content-length'], 10)
+            res.pipe(fs.createWriteStream(zipFile, {
+              flags: 'w'
+            }));
+            res.on('data', function(chunk) {
+              if (bar) {
+                bar.tick(chunk.length);
+              }
+            });
+            res.on('error', function(err) {
+              downloadError = err;
+            });
+            res.on('end', function() {
+              setTimeout(function() {
+                done(downloadError);
+              }, 100);
+            });
           });
-
-          res.pipe(fs.createWriteStream(zipFile, {
-            flags: 'w'
-          }));
-          res.on('data', function(chunk) {
-            if (bar) {
-              bar.tick(chunk.length);
-            }
-          });
-          res.on('error', function(err) {
-            downloadError = err;
-          });
-          res.on('end', function() {
-            setTimeout(function() {
-              done(downloadError);
-            }, 100);
-          });
-        });
     })();
   };
 
@@ -159,30 +161,31 @@ module.exports = function(formio, items, done) {
      *
      * @param done
      */
-    areYouSure: function(done) {
-      if (process.env.ROOT_EMAIL) {
-        done();
-      }
-      prompt.get([
-        {
-          name: 'install',
-          description: 'Are you sure you wish to install? (y/N)',
-          required: true
-        }
-      ], function(err, results) {
-        if (err) {
-          return done(err);
-        }
-        if (results.install.toLowerCase() !== 'y') {
-          return done('Installation canceled.');
-        }
-
-        done();
-      });
-    },
+    // areYouSure: function(done) {
+    //   if (process.env.ROOT_EMAIL) {
+    //     done();
+    //   }
+    //   prompt.get([
+    //     {
+    //       name: 'install',
+    //       description: 'Are you sure you wish to install? (y/N)',
+    //       required: true
+    //     }
+    //   ], function(err, results) {
+    //     if (err) {
+    //       return done(err);
+    //     }
+    //     if (results.install.toLowerCase() !== 'y') {
+    //       return done('Installation canceled.');
+    //     }
+    //
+    //     done();
+    //   });
+    // },
 
     // Allow them to select the application.
     whatApp: function(done) {
+      util.log('start whatApp...');
       if (process.env.ROOT_EMAIL) {
         done();
       }
@@ -194,40 +197,10 @@ module.exports = function(formio, items, done) {
         'https://github.com/formio/formio-app-salesquote',
         'https://github.com/formio/formio-app-basic'
       ];
-      let message = '\nWhich Github application would you like to install?\n'.green;
-      _.each(repos, function(repo, index) {
-        message += `  ${index + 1}.) ${repo}\n`;
-      });
-      message += '\nOr, you can provide a custom Github repository...\n'.green;
-      util.log(message);
-      prompt.get([
-        {
-          name: 'app',
-          description: 'GitHub repository or selection?',
-          default: '1',
-          required: true
-        }
-      ], function(err, results) {
-        if (err) {
-          return done(err);
-        }
-
-        if (results.app.indexOf('https://github.com/') !== -1) {
-          application = results.app;
-        }
-        else {
-          const selection = parseInt(results.app, 10);
-          if (_.isNumber(selection)) {
-            if ((selection > 1) && (selection <= repos.length)) {
-              application = repos[selection - 1];
-            }
-          }
-        }
-
-        // Replace github.com url.
-        application = application.replace('https://github.com/', '');
-        done();
-      });
+      application = repos[0];
+      application = application.replace('https://github.com/', '');
+      util.log('whatApp done');
+      done();
     },
 
     /**
@@ -237,16 +210,18 @@ module.exports = function(formio, items, done) {
      * @returns {*}
      */
     downloadApp: function(done) {
+      util.log('downloadApp start');
       if (!application) {
+        util.log('downloadApp done 1');
         return done();
       }
 
       // Download the app.
       download(
-        `https://codeload.github.com/${application}/zip/master`,
-        'app.zip',
-        'app',
-        done
+          `https://codeload.github.com/${application}/zip/master`,
+          'app.zip',
+          'app',
+          done
       );
     },
 
@@ -257,7 +232,9 @@ module.exports = function(formio, items, done) {
      * @returns {*}
      */
     extractApp: function(done) {
+      util.log('extractApp start');
       if (!application) {
+        util.log('extractApp done 1');
         return done();
       }
 
@@ -273,16 +250,18 @@ module.exports = function(formio, items, done) {
      * @returns {*}
      */
     downloadClient: function(done) {
+      util.log('downloadClient start');
       if (!items.download) {
+        util.log('downloadClient done 1');
         return done();
       }
 
       // Download the client.
       download(
-        'https://codeload.github.com/formio/formio-app-formio/zip/master',
-        'client.zip',
-        'client',
-        done
+          'https://codeload.github.com/formio/formio-app-formio/zip/master',
+          'client.zip',
+          'client',
+          done
       );
     },
 
@@ -293,7 +272,9 @@ module.exports = function(formio, items, done) {
      * @returns {*}
      */
     extractClient: function(done) {
+      util.log('extractClient start');
       if (!items.extract) {
+        util.log('extractClient done 1');
         return done();
       }
 
@@ -307,12 +288,15 @@ module.exports = function(formio, items, done) {
      * @return {*}
      */
     whatTemplate: function(done) {
+      util.log('whatTemplate start');
       if (application) {
         templateFile = 'app';
+        util.log('whatTemplate done 1');
         return done();
       }
       if (process.env.ROOT_EMAIL) {
         templateFile = 'client';
+        util.log('whatTemplate done 2');
         done();
       }
 
@@ -333,6 +317,7 @@ module.exports = function(formio, items, done) {
         }
 
         templateFile = results.templateFile ? results.templateFile : 'client';
+        util.log('whatTemplate done 3');
         done();
       });
     },
@@ -342,7 +327,9 @@ module.exports = function(formio, items, done) {
      * @param done
      */
     importTemplate: function(done) {
+      util.log('importTemplate start');
       if (!items.import) {
+        util.log('importTemplate done 1');
         return done();
       }
 
@@ -392,6 +379,7 @@ module.exports = function(formio, items, done) {
         }
 
         project = template;
+        util.log('importTemplate done 2');
         done(null, template);
       });
     },
@@ -402,6 +390,7 @@ module.exports = function(formio, items, done) {
      * @param done
      */
     createRootUser: function(done) {
+      util.log('createRootUser start');
       if (process.env.ROOT_EMAIL) {
         prompt.override = {
           email: process.env.ROOT_EMAIL,
@@ -409,61 +398,87 @@ module.exports = function(formio, items, done) {
         };
       }
       if (!items.user) {
+        util.log('createRootUser done 1');
         return done();
       }
       util.log('Creating root user account...'.green);
-      prompt.get([
-        {
-          name: 'email',
-          description: 'Enter your email address for the root account.',
-          pattern: /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
-          message: 'Must be a valid email',
-          required: true
-        },
-        {
-          name: 'password',
-          description: 'Enter your password for the root account.',
-          require: true,
-          hidden: true
-        }
-      ], function(err, result) {
+      util.log('Encrypting password');
+      formio.encrypt(rootPwd, function(err, hash) {
         if (err) {
           return done(err);
         }
 
-        util.log('Encrypting password');
-        formio.encrypt(result.password, function(err, hash) {
+        // Create the root user submission.
+        util.log('Creating root user account');
+        formio.resources.submission.model.create({
+          form: project.resources.admin._id,
+          data: {
+            email: rootUser,
+            password: hash
+          },
+          roles: [
+            project.roles.administrator._id
+          ]
+        }, function(err, item) {
           if (err) {
             return done(err);
           }
-
-          // Create the root user submission.
-          util.log('Creating root user account');
-          formio.resources.submission.model.create({
-            form: project.resources.admin._id,
-            data: {
-              email: result.email,
-              password: hash
-            },
-            roles: [
-              project.roles.administrator._id
-            ]
-          }, function(err, item) {
-            if (err) {
-              return done(err);
-            }
-
-            done();
-          });
+          util.log('createRootUser done 2');
+          done();
         });
       });
+      // prompt.get([
+      //   {
+      //     name: 'email',
+      //     description: 'Enter your email address for the root account.',
+      //     pattern: /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+      //     message: 'Must be a valid email',
+      //     required: true
+      //   },
+      //   {
+      //     name: 'password',
+      //     description: 'Enter your password for the root account.',
+      //     require: true,
+      //     hidden: true
+      //   }
+      // ], function(err, result) {
+      //   if (err) {
+      //     return done(err);
+      //   }
+      //
+      //   util.log('Encrypting password');
+      //   formio.encrypt(result.password, function(err, hash) {
+      //     if (err) {
+      //       return done(err);
+      //     }
+      //
+      //     // Create the root user submission.
+      //     util.log('Creating root user account');
+      //     formio.resources.submission.model.create({
+      //       form: project.resources.admin._id,
+      //       data: {
+      //         email: result.email,
+      //         password: hash
+      //       },
+      //       roles: [
+      //         project.roles.administrator._id
+      //       ]
+      //     }, function(err, item) {
+      //       if (err) {
+      //         return done(err);
+      //       }
+      //
+      //       done();
+      //     });
+      //   });
+      // });
     }
   };
 
   util.log('Installing...');
   prompt.start();
   async.series([
-    steps.areYouSure,
+    // steps.areYouSure,
     steps.whatApp,
     steps.downloadApp,
     steps.extractApp,
