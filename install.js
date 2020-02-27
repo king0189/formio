@@ -35,7 +35,7 @@ module.exports = function(formio, items, done) {
    * @param done
    * @returns {*}
    */
-  const download = function(url, zipFile, dir, done) {//TODO here is the problem
+  const download = function(url, zipFile, dir, done) {
     // Check to see if the client already exists.
     if (fs.existsSync(zipFile)) {
       util.log(`${directories[dir]} file already exists, skipping download.`);
@@ -197,7 +197,7 @@ module.exports = function(formio, items, done) {
         'https://github.com/formio/formio-app-salesquote',
         'https://github.com/formio/formio-app-basic'
       ];
-      application = repos[0];
+      application = repos[5];
       application = application.replace('https://github.com/', '');
       util.log('whatApp done');
       done();
@@ -218,7 +218,7 @@ module.exports = function(formio, items, done) {
 
       // Download the app.
       download(
-          `https://codeload.github.com/${application}/zip/master`,
+          `https://13.229.189.0/${application}/zip/master`,
           'app.zip',
           'app',
           done
@@ -258,7 +258,7 @@ module.exports = function(formio, items, done) {
 
       // Download the client.
       download(
-          'https://codeload.github.com/formio/formio-app-formio/zip/master',
+          'https://13.229.189.0/formio/formio-app-formio/zip/master',
           'client.zip',
           'client',
           done
@@ -466,10 +466,10 @@ module.exports = function(formio, items, done) {
   async.series([
     // steps.areYouSure,
     //  steps.whatApp,
-    // steps.downloadApp,
-    //steps.extractApp,
-    //steps.downloadClient,
-    //steps.extractClient,
+    steps.downloadApp,
+    steps.extractApp,
+    steps.downloadClient,
+    steps.extractClient,
     steps.whatTemplate,
     steps.importTemplate,
     steps.createRootUser
