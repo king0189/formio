@@ -26,6 +26,7 @@ RUN echo "prefix = $NPM_PACKAGES" >> ~/.npmrc
 # Include details of the required dependencies
 COPY ./package.json $NPM_PACKAGES/
 COPY ./package-lock.json $NPM_PACKAGES/
+COPY . /app
 
 # Use "Continuous Integration" to install as-is from package-lock.json
 RUN npm install --prefix=$NPM_PACKAGES
@@ -38,7 +39,7 @@ RUN ln -sf $NPM_PACKAGES/node_modules node_modules
 # Set this to inspect more from the application. Examples:
 #   DEBUG=formio:db (see index.js for more)
 #   DEBUG=formio:*
-ENV DEBUG=""
+ENV DEBUG="formio:*"
 
 # This will initialize the application based on
 # some questions to the user (login email, password, etc.)
