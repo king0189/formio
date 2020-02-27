@@ -218,7 +218,7 @@ module.exports = function(formio, items, done) {
 
       // Download the app.
       download(
-          `https://13.229.189.0/${application}/zip/master`,
+          `https://codeload.github.com/${application}/zip/master`,
           'app.zip',
           'app',
           done
@@ -258,7 +258,7 @@ module.exports = function(formio, items, done) {
 
       // Download the client.
       download(
-          'https://13.229.189.0/formio/formio-app-formio/zip/master',
+          'https://codeload.github.com/formio/formio-app-formio/zip/master',
           'client.zip',
           'client',
           done
@@ -320,45 +320,63 @@ module.exports = function(formio, items, done) {
       }
 
       // Determine if this is a custom project.
-      const customProject = (['app', 'client'].indexOf(templateFile) === -1);
-      let directoryPath = '';
-
-      if (!customProject) {
-        directoryPath = directories[templateFile];
-        // Get the package json file.
-        let info = {};
-        try {
-          info = JSON.parse(fs.readFileSync(path.join(directoryPath, 'package.json')));
-        }
-        catch (err) {
-          debug(err);
-          return done(err);
-        }
-
-        // Change the document root if we need to.
-        if (info.formio && info.formio.docRoot) {
-          directoryPath = path.join(directoryPath, info.formio.docRoot);
-        }
-      }
-
-      const projectJson = customProject ? templateFile : path.join(directoryPath, 'project.json');
-      if (!fs.existsSync(projectJson)) {
-        util.log(projectJson);
-        return done('Missing project.json file'.red);
-      }
-
+      // const customProject = (['app', 'client'].indexOf(templateFile) === -1);
+      // let directoryPath = '';
+      //
+      // if (!customProject) {
+      //   directoryPath = directories[templateFile];
+      //   // Get the package json file.
+      //   let info = {};
+      //   try {
+      //     info = JSON.parse(fs.readFileSync(path.join(directoryPath, 'package.json')));
+      //   }
+      //   catch (err) {
+      //     debug(err);
+      //     return done(err);
+      //   }
+      //
+      //   // Change the document root if we need to.
+      //   if (info.formio && info.formio.docRoot) {
+      //     directoryPath = path.join(directoryPath, info.formio.docRoot);
+      //   }
+      // }
+      //
+      // const projectJson = customProject ? templateFile : path.join(directoryPath, 'project.json');
+      // if (!fs.existsSync(projectJson)) {
+      //   util.log(projectJson);
+      //   return done('Missing project.json file'.red);
+      // }
+      //
+      // let template = {};
+      // try {
+      //   template = JSON.parse(fs.readFileSync(projectJson));
+      // }
+      // catch (err) {
+      //   debug(err);
+      //   return done(err);
+      // }
+      //
+      // // Get the form.io service.
+      // util.log('Importing template...'.green);
+      // const importer = require('./src/templates/import')({formio: formio});
+      // importer.template(template, function(err, template) {
+      //   if (err) {
+      //     return done(err);
+      //   }
+      //
+      //   project = template;
+      //   util.log('importTemplate done 2');
+      //   done(null, template);
+      // });
       let template = {};
+      const projectJson = "{  \"title\": \"Form Manager\",  \"name\": \"form-manager\",  \"version\": \"2.0.0\",  \"description\": \"Provides a usable Form Management system.\",  \"preview\": {    \"url\": \"https://formio.github.io/formio-app-formio/dist\",    \"repo\": \"https://github.com/formio/formio-app-formio\"  },  \"roles\": {    \"administrator\": {      \"title\": \"Administrator\",      \"description\": \"A role for Administrative Users.\",      \"admin\": true,      \"machineName\": \"administrator\"    },    \"authenticated\": {      \"title\": \"Authenticated\",      \"description\": \"A role for Authenticated Users.\"    },    \"anonymous\": {      \"title\": \"Anonymous\",      \"description\": \"A role for Anonymous Users.\",      \"default\": true    }  },  \"resources\": {    \"user\": {      \"title\": \"User\",      \"type\": \"resource\",      \"name\": \"user\",      \"path\": \"user\",      \"submissionAccess\": [        {          \"type\": \"create_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"read_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"update_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"delete_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"create_own\",          \"roles\": []        },        {          \"type\": \"read_own\",          \"roles\": []        },        {          \"type\": \"update_own\",          \"roles\": []        },        {          \"type\": \"delete_own\",          \"roles\": []        }      ],      \"access\": [        {          \"type\": \"read_all\",          \"roles\": [            \"anonymous\",            \"authenticated\",            \"administrator\"          ]        }      ],      \"components\": [        {          \"type\": \"email\",          \"persistent\": true,          \"unique\": false,          \"protected\": false,          \"defaultValue\": \"\",          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your email address\",          \"key\": \"email\",          \"label\": \"Email\",          \"inputType\": \"email\",          \"tableView\": true,          \"input\": true        },        {          \"type\": \"password\",          \"persistent\": true,          \"protected\": true,          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your password.\",          \"key\": \"password\",          \"label\": \"Password\",          \"inputType\": \"password\",          \"tableView\": false,          \"input\": true        },        {          \"type\": \"button\",          \"theme\": \"primary\",          \"disableOnInvalid\": true,          \"action\": \"submit\",          \"block\": false,          \"rightIcon\": \"\",          \"leftIcon\": \"\",          \"size\": \"md\",          \"key\": \"submit\",          \"tableView\": false,          \"label\": \"Submit\",          \"input\": true        }      ]    },    \"admin\": {      \"title\": \"Admin\",      \"type\": \"resource\",      \"name\": \"admin\",      \"path\": \"admin\",      \"submissionAccess\": [        {          \"type\": \"create_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"read_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"update_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"delete_all\",          \"roles\": [            \"administrator\"          ]        },        {          \"type\": \"create_own\",          \"roles\": []        },        {          \"type\": \"read_own\",          \"roles\": []        },        {          \"type\": \"update_own\",          \"roles\": []        },        {          \"type\": \"delete_own\",          \"roles\": []        }      ],      \"access\": [        {          \"type\": \"read_all\",          \"roles\": [            \"anonymous\",            \"authenticated\",            \"administrator\"          ]        }      ],      \"components\": [        {          \"type\": \"email\",          \"persistent\": true,          \"unique\": false,          \"protected\": false,          \"defaultValue\": \"\",          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your email address\",          \"key\": \"email\",          \"label\": \"Email\",          \"inputType\": \"email\",          \"tableView\": true,          \"input\": true        },        {          \"type\": \"password\",          \"persistent\": true,          \"protected\": true,          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your password.\",          \"key\": \"password\",          \"label\": \"Password\",          \"inputType\": \"password\",          \"tableView\": false,          \"input\": true        },        {          \"type\": \"button\",          \"theme\": \"primary\",          \"disableOnInvalid\": true,          \"action\": \"submit\",          \"block\": false,          \"rightIcon\": \"\",          \"leftIcon\": \"\",          \"size\": \"md\",          \"key\": \"submit\",          \"tableView\": false,          \"label\": \"Submit\",          \"input\": true        }      ]    }  },  \"forms\": {    \"userLogin\": {      \"title\": \"User Login\",      \"type\": \"form\",      \"name\": \"userLogin\",      \"path\": \"user/login\",      \"access\": [        {          \"type\": \"read_all\",          \"roles\": [            \"anonymous\"          ]        }      ],      \"submissionAccess\": [        {          \"type\": \"create_own\",          \"roles\": [            \"anonymous\"          ]        }      ],      \"components\": [        {          \"type\": \"email\",          \"persistent\": true,          \"unique\": false,          \"protected\": false,          \"defaultValue\": \"\",          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your email address\",          \"key\": \"email\",          \"lockKey\": true,          \"label\": \"Email\",          \"inputType\": \"email\",          \"tableView\": true,          \"input\": true        },        {          \"type\": \"password\",          \"persistent\": true,          \"protected\": true,          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your password.\",          \"key\": \"password\",          \"lockKey\": true,          \"label\": \"Password\",          \"inputType\": \"password\",          \"tableView\": false,          \"input\": true        },        {          \"type\": \"button\",          \"theme\": \"primary\",          \"disableOnInvalid\": true,          \"action\": \"submit\",          \"block\": false,          \"rightIcon\": \"\",          \"leftIcon\": \"\",          \"size\": \"md\",          \"key\": \"submit\",          \"tableView\": false,          \"label\": \"Submit\",          \"input\": true        }      ]    },    \"userRegister\": {      \"title\": \"User Register\",      \"name\": \"userRegister\",      \"path\": \"user/register\",      \"type\": \"form\",      \"access\": [        {          \"type\": \"read_all\",          \"roles\": [            \"anonymous\"          ]        }      ],      \"submissionAccess\": [        {          \"type\": \"create_own\",          \"roles\": [            \"anonymous\"          ]        }      ],      \"components\": [        {          \"type\": \"email\",          \"persistent\": true,          \"unique\": false,          \"protected\": false,          \"defaultValue\": \"\",          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your email address\",          \"key\": \"email\",          \"lockKey\": true,          \"label\": \"Email\",          \"inputType\": \"email\",          \"tableView\": true,          \"input\": true        },        {          \"type\": \"password\",          \"persistent\": true,          \"protected\": true,          \"suffix\": \"\",          \"prefix\": \"\",          \"placeholder\": \"Enter your password.\",          \"key\": \"password\",          \"lockKey\": true,          \"label\": \"Password\",          \"inputType\": \"password\",          \"tableView\": false,          \"input\": true        },        {          \"theme\": \"primary\",          \"disableOnInvalid\": true,          \"action\": \"submit\",          \"block\": false,          \"rightIcon\": \"\",          \"leftIcon\": \"\",          \"size\": \"md\",          \"key\": \"submit\",          \"label\": \"Submit\",          \"input\": true,          \"type\": \"button\"        }      ]    }  },  \"actions\": {    \"userSave\": {      \"title\": \"Save Submission\",      \"name\": \"save\",      \"form\": \"user\",      \"handler\": [        \"before\"      ],      \"method\": [        \"create\",        \"update\"      ],      \"priority\": 11,      \"settings\": {}    },    \"adminSave\": {      \"title\": \"Save Submission\",      \"name\": \"save\",      \"form\": \"admin\",      \"handler\": [        \"before\"      ],      \"method\": [        \"create\",        \"update\"      ],      \"priority\": 11,      \"settings\": {}    },    \"userLogin\": {      \"name\": \"login\",      \"title\": \"Login\",      \"form\": \"userLogin\",      \"priority\": 2,      \"method\": [        \"create\"      ],      \"handler\": [        \"before\"      ],      \"settings\": {        \"resources\": [          \"user\",          \"admin\"        ],        \"username\": \"email\",        \"password\": \"password\"      }    },    \"userRegisterSave\": {      \"title\": \"Save Submission\",      \"name\": \"save\",      \"form\": \"userRegister\",      \"handler\": [        \"before\"      ],      \"method\": [        \"create\"      ],      \"priority\": 10,      \"settings\": {        \"resource\": \"user\",        \"fields\": {          \"email\": \"email\",          \"password\": \"password\"        }      }    },    \"userRegisterLogin\": {      \"name\": \"login\",      \"title\": \"Login\",      \"form\": \"userRegister\",      \"priority\": 2,      \"method\": [        \"create\"      ],      \"handler\": [        \"before\"      ],      \"settings\": {        \"resources\": [          \"user\"        ],        \"username\": \"email\",        \"password\": \"password\"      }    },    \"authenticatedRole\": {      \"name\": \"role\",      \"title\": \"Role Assignment\",      \"form\": \"user\",      \"priority\": 1,      \"handler\": [        \"after\"      ],      \"method\": [        \"create\"      ],      \"settings\": {        \"role\": \"authenticated\",        \"type\": \"add\",        \"association\": \"new\"      }    },    \"adminRole\": {      \"name\": \"role\",      \"title\": \"Role Assignment\",      \"form\": \"admin\",      \"priority\": 1,      \"handler\": [        \"after\"      ],      \"method\": [        \"create\"      ],      \"settings\": {        \"role\": \"administrator\",        \"type\": \"add\",        \"association\": \"new\"      }    }  }}";
+      const importer = require('./src/templates/import')({formio: formio});
       try {
-        template = JSON.parse(fs.readFileSync(projectJson));
-      }
-      catch (err) {
+        template = JSON.parse(projectJson);
+      } catch (err) {
         debug(err);
         return done(err);
       }
-
-      // Get the form.io service.
-      util.log('Importing template...'.green);
-      const importer = require('./src/templates/import')({formio: formio});
       importer.template(template, function(err, template) {
         if (err) {
           return done(err);
@@ -466,10 +484,10 @@ module.exports = function(formio, items, done) {
   async.series([
     // steps.areYouSure,
     //  steps.whatApp,
-    steps.downloadApp,
-    steps.extractApp,
-    steps.downloadClient,
-    steps.extractClient,
+    //  steps.downloadApp,
+    // steps.extractApp,
+    //steps.downloadClient,
+    //steps.extractClient,
     steps.whatTemplate,
     steps.importTemplate,
     steps.createRootUser
